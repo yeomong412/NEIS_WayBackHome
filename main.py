@@ -6,7 +6,7 @@ class task():
     @classmethod
     def CtoK(cls, c): return 273.15 + c
     
-# hi, this is test!s
+# hi, this is test!ssdfsd
 
 class Heater_RTG(task):
     def __init__(self):
