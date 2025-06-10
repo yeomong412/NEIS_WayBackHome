@@ -59,6 +59,6 @@ class Heater_RTG(task):
 
 class Rendezvous(task):
     def __init__(self):
-        pass
+        pass #
 
 Heater_RTG()
