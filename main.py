@@ -265,4 +265,194 @@ class Food_Mars:
         for widget in self.root.winfo_children():
             widget.destroy()
 
-#blabla
+#
+import tkinter as tk
+from tkinter import messagebox, ttk
+from datetime import datetime
+import random
+import json
+
+class MarsApp:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("화성 생존 시뮬레이터")
+        self.root.geometry("740x600")
+        self.food_data = {}
+        self.consumed = []
+        self.produced = []
+        self.start_date = None
+        self.dday = None
+        self.total_calories = 0
+        self.daily_calories_needed = 2000
+        self.today_calories_consumed = 0
+        self.fire_ready = False
+        self.water_ready = False
+
+        self.load_data()
+        self.create_main_menu()
+
+    def create_main_menu(self):
+        self.clear_window()
+        tk.Label(self.root, text="화성 생존 시뮬레이터", font=("Arial", 16)).pack(pady=20)
+        tk.Button(self.root, text="🍽 식량 관리", width=20, command=self.check_and_open_food).pack(pady=10)
+        tk.Button(self.root, text="🌱 농사 관리", width=20, command=self.open_farming_stage_menu).pack(pady=10)
+
+    def open_farming_stage_menu(self):
+        self.clear_window()
+        tk.Label(self.root, text="[1단계] 불 피우기").pack(pady=5)
+        tk.Button(self.root, text="🔥 불 피우기", command=self.set_fire_ready).pack(pady=5)
+
+        tk.Label(self.root, text="[2단계] 물 만들기").pack(pady=5)
+        self.water_btn = tk.Button(self.root, text="💧 물 생성 (불이 켜져야 함)", state=tk.DISABLED, command=self.set_water_ready)
+        self.water_btn.pack(pady=5)
+
+        tk.Label(self.root, text="[3단계] 농사 시작").pack(pady=5)
+        self.farm_btn = tk.Button(self.root, text="🌱 농사 시작하기", state=tk.DISABLED, command=self.open_farm_input)
+        self.farm_btn.pack(pady=5)
+
+        tk.Button(self.root, text="◀ 돌아가기", command=self.create_main_menu).pack(pady=20)
+
+    def open_farm_input(self):
+        self.clear_window()
+        tk.Label(self.root, text="농사 시작 전 자원을 입력하세요").pack(pady=5)
+
+        self.iridium_entry = tk.Entry(self.root)
+        self.fuel_entry = tk.Entry(self.root)
+        self.seeds_entry = tk.Entry(self.root)
+
+        tk.Label(self.root, text="이리듐 (일 수):").pack()
+        self.iridium_entry.pack()
+        tk.Label(self.root, text="연료 (일 수):").pack()
+        self.fuel_entry.pack()
+        tk.Label(self.root, text="종자 수:").pack()
+        self.seeds_entry.pack()
+
+        tk.Label(self.root, text="작물 선택:").pack()
+        self.crop_var = tk.StringVar(value="감자")
+        tk.OptionMenu(self.root, self.crop_var, "감자", "당근", "배추").pack()
+
+        tk.Button(self.root, text="확인", command=self.start_farming).pack(pady=10)
+        tk.Button(self.root, text="◀ 돌아가기", command=self.open_farming_stage_menu).pack()
+
+    def start_farming(self):
+        try:
+            self.iridium = int(self.iridium_entry.get())
+            self.fuel = int(self.fuel_entry.get())
+            self.seeds = int(self.seeds_entry.get())
+            self.water_days = self.iridium
+            self.selected_crop = self.crop_var.get()
+            self.crop_info = {
+                "감자": {"grow_days": 4},
+                "당근": {"grow_days": 5},
+                "배추": {"grow_days": 6},
+            }
+            self.farm_grid = [["o"] * 6 for _ in range(6)]
+            self.crop_growth = [[0] * 6 for _ in range(6)]
+            self.day_count = 0
+            self.open_farm_screen()
+        except:
+            messagebox.showerror("입력 오류", "숫자를 정확히 입력해주세요.")
+
+    def open_farm_screen(self):
+        self.clear_window()
+        status = f"작물: {self.selected_crop} | 연료: {self.fuel} | 이리듐: {self.iridium} | 종자: {self.seeds} | 물: {self.water_days}"
+        tk.Label(self.root, text=status).pack()
+
+        frame = tk.Frame(self.root)
+        frame.pack()
+        self.farm_labels = []
+        for i in range(6):
+            row = []
+            for j in range(6):
+                lbl = tk.Label(frame, text=self.farm_grid[i][j], width=2, height=1, borderwidth=1, relief="solid", font=("Courier", 14))
+                lbl.grid(row=i, column=j, padx=1, pady=1)
+                row.append(lbl)
+            self.farm_labels.append(row)
+
+        tk.Button(self.root, text="☀ 하루 보내기", command=self.next_day).pack(pady=5)
+        tk.Button(self.root, text="🥕 수확하기", command=self.harvest).pack(pady=5)
+        tk.Button(self.root, text="🌱 다시 심기", command=self.replant).pack(pady=5)
+        tk.Button(self.root, text="🏠 홈으로", command=self.create_main_menu).pack(pady=10)
+
+    def next_day(self):
+        self.day_count += 1
+        self.fuel -= 1
+        self.iridium -= 1
+        self.water_days -= 1
+
+        for i in range(6):
+            for j in range(6):
+                if self.farm_grid[i][j] in ['o', 'r']:
+                    self.crop_growth[i][j] += 1
+                    days = self.crop_info[self.selected_crop]["grow_days"]
+                    if self.crop_growth[i][j] >= days:
+                        self.farm_grid[i][j] = 'Y'
+                    else:
+                        self.farm_grid[i][j] = 'r'
+
+        if self.water_days <= 0:
+            center = 2
+            radius = min(3, self.day_count)
+            for i in range(6):
+                for j in range(6):
+                    if abs(i - center) + abs(j - center) <= radius:
+                        if self.farm_grid[i][j] in ['o', 'r']:
+                            self.farm_grid[i][j] = 'x'
+
+        self.show_warnings()
+        self.refresh_farm()
+
+    def harvest(self):
+        count = 0
+        for i in range(6):
+            for j in range(6):
+                if self.farm_grid[i][j] == 'Y':
+                    self.farm_grid[i][j] = '.'
+                    self.crop_growth[i][j] = 0
+                    count += 1
+                    self.seeds += 1
+        messagebox.showinfo("수확 완료", f"{count}개 수확 완료!")
+        self.refresh_farm()
+
+    def replant(self):
+        for i in range(6):
+            for j in range(6):
+                if self.farm_grid[i][j] == '.' and self.seeds > 0:
+                    self.farm_grid[i][j] = 'o'
+                    self.crop_growth[i][j] = 0
+                    self.seeds -= 1
+        self.refresh_farm()
+
+    def refresh_farm(self):
+        for i in range(6):
+            for j in range(6):
+                self.farm_labels[i][j].config(text=self.farm_grid[i][j])
+
+    def show_warnings(self):
+        for name, value in [("연료", self.fuel), ("이리듐", self.iridium), ("물", self.water_days), ("종자", self.seeds)]:
+            if value in [5, 4, 3, 2, 1]:
+                messagebox.showwarning("자원 경고", f"⚠️ {name}이 {value}일치밖에 남지 않았습니다.")
+
+    def set_fire_ready(self):
+        self.fire_ready = True
+        self.water_btn.config(state=tk.NORMAL)
+
+    def set_water_ready(self):
+        if self.fire_ready:
+            self.water_ready = True
+            self.farm_btn.config(state=tk.NORMAL)
+
+    def check_and_open_food(self):
+        messagebox.showinfo("기능 알림", "식량 관리 기능은 현재 비활성화 되어 있습니다.")
+
+    def clear_window(self):
+        for widget in self.root.winfo_children():
+            widget.destroy()
+
+    def load_data(self):
+        pass  # 생략 가능
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = MarsApp(root)
+    root.mainloop()
