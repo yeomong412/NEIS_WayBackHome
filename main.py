@@ -89,7 +89,7 @@ class sandstorm():
             move=input()        
             time.sleep(0.7)
             for i in range(19):
-                for j in range(19):
+                for j in range(19):#
                     print(l[i][j],end=" ")
                 print()
             for i in range(19):
