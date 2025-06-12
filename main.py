@@ -16,7 +16,7 @@ class Heater_RTG(task):
         self.density_air = 1.29  # kg/m³
         self.specificHeat_air = 1005  # J/kg/K
         self.outside_temp = task.CtoK(-58)  # K
-        self.loss_of_Heat = 18.5  # W/K
+        self.loss_of_Heat = 18.5  # W/Kdddsfdf
         self.time_s = 1
 
         self.time_data = []
