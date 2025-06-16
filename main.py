@@ -69,11 +69,19 @@ Heater_RTG()
 
 
 
-class Food_Mars:
+import tkinter as tk
+from tkinter import messagebox, ttk
+from datetime import datetime, timedelta
+import random
+import json
+
+
+class MarsApp:
     def __init__(self, root):
         self.root = root
         self.root.title("화성 생존 시뮬레이터")
         self.root.geometry("740x600")
+
         self.food_data = {}
         self.consumed = []
         self.produced = []
@@ -82,15 +90,42 @@ class Food_Mars:
         self.total_calories = 0
         self.daily_calories_needed = 2000
         self.today_calories_consumed = 0
+        self.in_farm_screen = False
 
+        self.fire_ready = False
+        self.water_ready = False
+        self.farming_started = False
+
+        self.load_data()
         self.create_main_menu()
 
+    # ✅ 메뉴 UI
     def create_main_menu(self):
         self.clear_window()
-        tk.Label(self.root, text="화성 생존 시뮬레이터", font=("Arial", 16)).pack(pady=20)
-        tk.Button(self.root, text="🍽 식량 관리", width=20, command=self.check_and_open_food).pack(pady=10)
-        tk.Button(self.root, text="🌱 농사 관리 (준비 중)", width=20, state=tk.DISABLED).pack(pady=10)
+        # create_main_menu() 내 제목 라벨 교체 부분
+        title_frame = tk.Frame(self.root, bg="#1a1a1a", padx=20, pady=10)
+        title_frame.pack(pady=30)
 
+        tk.Label(
+            title_frame,
+            text="화성 생존 시뮬레이터",
+            font=("Helvetica", 24, "bold"),
+            fg="white",
+            bg="#1a1a1a"
+        ).pack()
+
+        tk.Label(
+            title_frame,
+            text="Mars Survival Simulator v1.0",
+            font=("Helvetica", 12),
+            fg="#cccccc",
+            bg="#1a1a1a"
+        ).pack()
+
+        tk.Button(self.root, text="🍽 식량 관리", width=20, command=self.check_and_open_food).pack(pady=10)
+        tk.Button(self.root, text="🌱 농사 관리", width=20, command=self.open_farming_stage_menu).pack(pady=10)
+
+    # ✅ 식량 관리 (원래 코드 그대로 유지)
     def check_and_open_food(self):
         if not self.food_data:
             self.open_food_input()
@@ -134,9 +169,10 @@ class Food_Mars:
             messagebox.showerror("형식 오류", f"입력 형식이 잘못되었습니다.\n{e}")
 
     def open_main_food_screen(self):
+        self.in_farm_screen = False
         self.clear_window()
-        today = datetime.now().date()
-        dday_remaining = (self.dday - today).days
+        today = self.start_date
+        dday_remaining = (self.dday - self.start_date).days
         tk.Label(self.root, text=f"D-{dday_remaining}", anchor="w").place(x=10, y=10)
         tk.Label(self.root, text=f"{today}", anchor="e").place(x=600, y=10)
 
@@ -174,6 +210,7 @@ class Food_Mars:
 
         tk.Button(self.root, text="💡 생존 팁", command=self.show_tip).place(x=20, y=360)
         tk.Button(self.root, text="🔧 섭취 기준 변경", command=self.change_daily_calories).place(x=120, y=360)
+        tk.Button(self.root, text="🏠 홈으로", command=lambda: [self.save_data(), self.create_main_menu()]).place(x=270, y=360)
 
         self.update_banner()
 
@@ -188,7 +225,8 @@ class Food_Mars:
     def update_banner(self):
         survival_days = self.total_calories // self.daily_calories_needed
         remaining_cal = max(0, self.daily_calories_needed - self.today_calories_consumed)
-        info_text = f"총 보유 칼로리: {self.total_calories} kcal   |   예상 생존 가능 일수: {survival_days}일   |   오늘 남은 칼로리: {remaining_cal} kcal   |   하루 기준: {self.daily_calories_needed} kcal   "
+        dday_remain = (self.dday - self.start_date).days
+        info_text = f"날짜: {self.start_date} | D-{dday_remain} | 총 보유 칼로리: {self.total_calories} kcal | 예상 생존 가능 일수: {survival_days}일 | 오늘 남은 칼로리: {remaining_cal} kcal | 하루 기준: {self.daily_calories_needed} kcal"
 
         banner_frame = tk.Frame(self.root, bg="black", height=40)
         banner_frame.place(x=0, y=560, width=740, height=40)
@@ -265,37 +303,33 @@ class Food_Mars:
         for widget in self.root.winfo_children():
             widget.destroy()
 
-#
-import tkinter as tk
-from tkinter import messagebox, ttk
-from datetime import datetime
-import random
-import json
 
-class MarsApp:
-    def __init__(self, root):
-        self.root = root
-        self.root.title("화성 생존 시뮬레이터")
-        self.root.geometry("740x600")
-        self.food_data = {}
-        self.consumed = []
-        self.produced = []
-        self.start_date = None
-        self.dday = None
-        self.total_calories = 0
-        self.daily_calories_needed = 2000
-        self.today_calories_consumed = 0
-        self.fire_ready = False
-        self.water_ready = False
+    def save_data(self):
+        data = {
+            "food_data": self.food_data,
+            "total_calories": self.total_calories,
+            "start_date": str(self.start_date),
+            "dday": str(self.dday),
+            "daily_calories_needed": self.daily_calories_needed,
+            "today_calories_consumed": self.today_calories_consumed
+        }
+        with open("mars_data.json", "w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False)
 
-        self.load_data()
-        self.create_main_menu()
+    def load_data(self):
+        try:
+            with open("mars_data.json", "r", encoding="utf-8") as f:
+                data = json.load(f)
+                self.food_data = data["food_data"]
+                self.total_calories = data["total_calories"]
+                self.start_date = datetime.strptime(data["start_date"], "%Y-%m-%d").date()  # 추가
+                self.dday = datetime.strptime(data["dday"], "%Y-%m-%d").date()
+                self.daily_calories_needed = data["daily_calories_needed"]
+                self.today_calories_consumed = data["today_calories_consumed"]
+        except Exception:
+            pass
 
-    def create_main_menu(self):
-        self.clear_window()
-        tk.Label(self.root, text="화성 생존 시뮬레이터", font=("Arial", 16)).pack(pady=20)
-        tk.Button(self.root, text="🍽 식량 관리", width=20, command=self.check_and_open_food).pack(pady=10)
-        tk.Button(self.root, text="🌱 농사 관리", width=20, command=self.open_farming_stage_menu).pack(pady=10)
+    # ✅ 농사 기능 (기존 농사 기능 코드도 그대로 유지)
 
     def open_farming_stage_menu(self):
         self.clear_window()
@@ -307,10 +341,21 @@ class MarsApp:
         self.water_btn.pack(pady=5)
 
         tk.Label(self.root, text="[3단계] 농사 시작").pack(pady=5)
-        self.farm_btn = tk.Button(self.root, text="🌱 농사 시작하기", state=tk.DISABLED, command=self.open_farm_input)
+        self.farm_btn = tk.Button(self.root, text="🌱 농사 시작하기", state=tk.DISABLED, command=self.start_or_continue_farming)
+
         self.farm_btn.pack(pady=5)
 
         tk.Button(self.root, text="◀ 돌아가기", command=self.create_main_menu).pack(pady=20)
+        # ✅ 불과 물이 모두 준비되었고, 농사를 이미 시작했으면 바로 농사 화면 열기
+        if self.fire_ready and self.water_ready and self.farming_started:
+            self.open_farm_screen()
+
+    def start_or_continue_farming(self):
+        if not self.farming_started:
+            self.open_farm_input()
+        else:
+            self.open_farm_screen()
+
 
     def open_farm_input(self):
         self.clear_window()
@@ -352,33 +397,93 @@ class MarsApp:
             self.open_farm_screen()
         except:
             messagebox.showerror("입력 오류", "숫자를 정확히 입력해주세요.")
+        self.farming_started = True  # 플래그 설정
 
     def open_farm_screen(self):
+        self.in_farm_screen = True
         self.clear_window()
-        status = f"작물: {self.selected_crop} | 연료: {self.fuel} | 이리듐: {self.iridium} | 종자: {self.seeds} | 물: {self.water_days}"
-        tk.Label(self.root, text=status).pack()
 
+        # 상단 상태 표시
+        status = f"날짜: {self.start_date} | 작물: {self.selected_crop} | 연료: {self.fuel} | 이리듐: {self.iridium} | 종자: {self.seeds} | 물: {self.water_days}"
+        tk.Label(self.root, text=status, font=("Arial", 11)).pack(pady=3)
+
+        # 밭 (6x6)
         frame = tk.Frame(self.root)
         frame.pack()
         self.farm_labels = []
         for i in range(6):
             row = []
             for j in range(6):
-                lbl = tk.Label(frame, text=self.farm_grid[i][j], width=2, height=1, borderwidth=1, relief="solid", font=("Courier", 14))
+                lbl = tk.Label(frame, text=self.farm_grid[i][j], width=2, height=1, borderwidth=1, relief="solid",
+                               font=("Courier", 14))
                 lbl.grid(row=i, column=j, padx=1, pady=1)
                 row.append(lbl)
             self.farm_labels.append(row)
 
-        tk.Button(self.root, text="☀ 하루 보내기", command=self.next_day).pack(pady=5)
-        tk.Button(self.root, text="🥕 수확하기", command=self.harvest).pack(pady=5)
-        tk.Button(self.root, text="🌱 다시 심기", command=self.replant).pack(pady=5)
+        # 메인 작업 프레임 (좌/우 배치)
+        action_frame = tk.Frame(self.root)
+        action_frame.pack(pady=10)
+
+        # 왼쪽 작업 (하루, 수확, 다시심기)
+        left_frame = tk.Frame(action_frame, relief=tk.GROOVE, borderwidth=2, padx=10, pady=10)
+        left_frame.pack(side="left", padx=10)
+
+        tk.Label(left_frame, text="[작물 관리]", font=("Arial", 11)).pack(pady=3)
+        tk.Button(left_frame, text="☀ 하루 보내기", command=self.next_day).pack(pady=3)
+        tk.Button(left_frame, text="🥕 수확하기", command=self.harvest).pack(pady=3)
+        tk.Label(left_frame, text="심을 작물 선택:").pack()
+        self.replant_crop_var = tk.StringVar(value="감자")
+        tk.OptionMenu(left_frame, self.replant_crop_var, "감자", "당근", "배추").pack()
+        tk.Button(left_frame, text="🌱 다시 심기", command=self.replant).pack(pady=3)
+
+        # 오른쪽 작업 (에너지 추가)
+        right_frame = tk.Frame(action_frame, relief=tk.GROOVE, borderwidth=2, padx=10, pady=10)
+        right_frame.pack(side="right", padx=10)
+
+        tk.Label(right_frame, text="[에너지 추가]", font=("Arial", 11)).pack(pady=3)
+        tk.Label(right_frame, text="자원 이름 (연료, 이리듐, 종자 중 택1):").pack()
+        self.energy_name = tk.Entry(right_frame)
+        self.energy_name.pack()
+        tk.Label(right_frame, text="수량:").pack()
+        self.energy_amount = tk.Entry(right_frame)
+        self.energy_amount.pack()
+        tk.Button(right_frame, text="➕ 에너지 추가", command=self.add_energy).pack(pady=3)
+
+        # 하단 홈으로 버튼
         tk.Button(self.root, text="🏠 홈으로", command=self.create_main_menu).pack(pady=10)
+
+    def add_energy(self):
+        name = self.energy_name.get().strip()
+        amount = self.energy_amount.get().strip()
+        if not amount.isdigit():
+            messagebox.showwarning("입력 오류", "수량은 숫자로 입력해주세요.")
+            return
+
+        amount = int(amount)
+        if name == "연료":
+            self.fuel += amount
+        elif name == "이리듐":
+            self.iridium += amount
+            self.water_days += amount
+        elif name == "종자":
+            self.seeds += amount
+        else:
+            messagebox.showwarning("입력 오류", "연료, 이리듐, 종자 중에서 입력해주세요.")
+            return
+
+        self.refresh_farm()
+        messagebox.showinfo("추가됨", f"{name} {amount}개 추가됨.")
 
     def next_day(self):
         self.day_count += 1
         self.fuel -= 1
         self.iridium -= 1
         self.water_days -= 1
+
+        self.start_date += timedelta(days=1)
+
+        if not self.in_farm_screen:  # ← 배너는 식량 화면에서만!
+            self.update_banner()
 
         for i in range(6):
             for j in range(6):
@@ -403,6 +508,7 @@ class MarsApp:
         self.refresh_farm()
 
     def harvest(self):
+        crop_kcal_map = {"감자": 150, "당근": 120, "배추": 100}
         count = 0
         for i in range(6):
             for j in range(6):
@@ -411,16 +517,31 @@ class MarsApp:
                     self.crop_growth[i][j] = 0
                     count += 1
                     self.seeds += 1
+
+        # 수확한 작물을 식량 데이터에 반영
+        if count > 0:
+            cal = crop_kcal_map[self.selected_crop]
+            self.total_calories += count * cal
+            if self.selected_crop in self.food_data:
+                self.food_data[self.selected_crop][0] += count
+            else:
+                self.food_data[self.selected_crop] = [count, cal]
+
         messagebox.showinfo("수확 완료", f"{count}개 수확 완료!")
         self.refresh_farm()
 
     def replant(self):
+        crop_symbol = 'o'  # 기본 표시 기호 (여기선 구분용이 아니라 시각용이라 고정)
+        selected_crop = self.replant_crop_var.get()
+        self.selected_crop = selected_crop  # 선택된 작물 갱신
+
         for i in range(6):
             for j in range(6):
                 if self.farm_grid[i][j] == '.' and self.seeds > 0:
-                    self.farm_grid[i][j] = 'o'
+                    self.farm_grid[i][j] = crop_symbol
                     self.crop_growth[i][j] = 0
                     self.seeds -= 1
+
         self.refresh_farm()
 
     def refresh_farm(self):
@@ -442,16 +563,41 @@ class MarsApp:
             self.water_ready = True
             self.farm_btn.config(state=tk.NORMAL)
 
-    def check_and_open_food(self):
-        messagebox.showinfo("기능 알림", "식량 관리 기능은 현재 비활성화 되어 있습니다.")
 
+
+
+    # ✅ 공통 함수들
     def clear_window(self):
         for widget in self.root.winfo_children():
             widget.destroy()
 
-    def load_data(self):
-        pass  # 생략 가능
+    def save_data(self):
+        data = {
+            "food_data": self.food_data,
+            "total_calories": self.total_calories,
+            "start_date": str(self.start_date),
+            "dday": str(self.dday),
+            "daily_calories_needed": self.daily_calories_needed,
+            "today_calories_consumed": self.today_calories_consumed
+        }
+        with open("mars_data.json", "w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False)
 
+    def load_data(self):
+        try:
+            with open("mars_data.json", "r", encoding="utf-8") as f:
+                data = json.load(f)
+                self.food_data = data["food_data"]
+                self.total_calories = data["total_calories"]
+                self.start_date = datetime.strptime(data["start_date"], "%Y-%m-%d").date()
+                self.dday = datetime.strptime(data["dday"], "%Y-%m-%d").date()
+                self.daily_calories_needed = data["daily_calories_needed"]
+                self.today_calories_consumed = data["today_calories_consumed"]
+        except Exception:
+            pass
+
+
+# ✅ 실행부
 if __name__ == "__main__":
     root = tk.Tk()
     app = MarsApp(root)
