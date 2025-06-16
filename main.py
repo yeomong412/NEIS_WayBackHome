@@ -59,6 +59,12 @@ class Heater_RTG(task):
 
 class Rendezvous(task):
     def __init__(self):
-        pass #
+        print("Wellcome to the Rendezvous Support System! \n \
+                Please notice informations of the spacecraft.")
+        coordinate_text = input("spacecraft's coordinate?  x, y, z [km] : ")
+        initial_velo_text = input("spacecraft's initial velocity relative to the Mars? v_x, v_y, v_z [km/s] : ")
+        print("-" * 10)
+    
+    
 
 Heater_RTG()
