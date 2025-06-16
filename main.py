@@ -796,23 +796,23 @@ class MarsApp:
             pass
 
 
-
-
-
-# rv = Rendezvous()
-# result = rv.find_closest_approach()
-# print(f"\n최소 접근 거리: {result['min_distance_km']:.3f} km")
-# print(f"상대 속도: {result['relative_speed_km_s']:.3f} km/s")
-# print(f"접근까지 걸린 시간: {result['time_to_min_s']:.1f} s")
-# rv.visualize(steps=3000)
-
-
 #Heater_RTG()
+
+
+rv = Rendezvous()
+result = rv.find_closest_approach()
+print(f"\n최소 접근 거리: {result['min_distance_km']:.3f} km")
+print(f"상대 속도: {result['relative_speed_km_s']:.3f} km/s")
+print(f"접근까지 걸린 시간: {result['time_to_min_s']:.1f} s")
+rv.visualize(steps=3000)
+
+
+
 #Rendezvous()
 
 
-# ✅ 실행부
-if __name__ == "__main__":
-    root = tk.Tk()
-    app = MarsApp(root)
-    root.mainloop()
+# # ✅ 실행부
+# if __name__ == "__main__":
+#     root = tk.Tk()
+#     app = MarsApp(root)
+#     root.mainloop()
