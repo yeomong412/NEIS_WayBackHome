@@ -60,7 +60,7 @@ def run_intro():
         time.sleep(0.1)
 
     print()
-    type_print("모듈을 선택해주세요. 🚨 생존이 달려있습니다!\n", delay=0.02)
+    type_print("모듈을 선택해주세요. \n", delay=0.02)
     main_menu()
 
 def main_menu():
@@ -80,20 +80,20 @@ def main_menu():
         #     root = tk.Tk()
         #     app = MarsApp(root)
         #     root.mainloop()
-    # 각 기능 시작 넣기
         pass
+    # 각 기능 시작 넣기
     elif choice == "5":
         pass
     # 각 기능 시작 넣기
     elif choice == "6":
         # rv = Rendezvous()
-    # result = rv.find_closest_approach()
-    # print(f"\n최소 접근 거리: {result['min_distance_km']:.3f} km")
-    # print(f"상대 속도: {result['relative_speed_km_s']:.3f} km/s")
-    # print(f"접근까지 걸린 시간: {result['time_to_min_s']:.1f} s")
-    # rv.visualize(steps=3000)
-    # 각 기능 시작 넣기
+        # result = rv.find_closest_approach()
+        # print(f"\n최소 접근 거리: {result['min_distance_km']:.3f} km")
+        # print(f"상대 속도: {result['relative_speed_km_s']:.3f} km/s")
+        # print(f"접근까지 걸린 시간: {result['time_to_min_s']:.1f} s")
+        # rv.visualize(steps=3000)
         pass
+    # 각 기능 시작 넣기
     else:
         print("\n잘못된 입력입니다. 1~6 사이 숫자를 입력해주세요.")
         main_menu()
