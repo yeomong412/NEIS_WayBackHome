@@ -276,7 +276,6 @@ class Rendezvous(task):
         ax.legend()
         plt.tight_layout()
         plt.show()
-Heater_RTG()
 
 
 
@@ -807,12 +806,12 @@ class MarsApp:
 
 
 
-rv = Rendezvous()
-result = rv.find_closest_approach()
-print(f"\n최소 접근 거리: {result['min_distance_km']:.3f} km")
-print(f"상대 속도: {result['relative_speed_km_s']:.3f} km/s")
-print(f"접근까지 걸린 시간: {result['time_to_min_s']:.1f} s")
-rv.visualize(steps=3000)
+# rv = Rendezvous()
+# result = rv.find_closest_approach()
+# print(f"\n최소 접근 거리: {result['min_distance_km']:.3f} km")
+# print(f"상대 속도: {result['relative_speed_km_s']:.3f} km/s")
+# print(f"접근까지 걸린 시간: {result['time_to_min_s']:.1f} s")
+# rv.visualize(steps=3000)
 
 
 #Heater_RTG()
