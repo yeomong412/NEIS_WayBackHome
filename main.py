@@ -7,7 +7,96 @@ from tkinter import messagebox, ttk
 import random
 from datetime import datetime, timedelta
 import json
+import os
+import sys
 
+def type_print(text, delay=0.03, newline=True):
+    for char in text:
+        sys.stdout.write(char)
+        sys.stdout.flush()
+        time.sleep(delay)
+    if newline:
+        print()
+
+def run_intro():
+
+
+    install_msgs = [
+        "[시스템] 생존 모듈 초기화 중...",
+        "[시스템] 연료 시스템 점검 중...",
+        "[시스템] 생명유지장치 온라인...",
+        "[시스템] 내부 온도 조절기 가동...",
+        "[시스템] 감자 재배 모듈 활성화...",
+        "[시스템] 통신 장비 복구 시도...",
+        "[시스템] 긴급 탐사 장비 로딩 중...",
+        "[시스템] 완료.",
+    ]
+
+    for msg in install_msgs:
+        type_print(msg, delay=0.02)
+        time.sleep(0.2)
+
+    time.sleep(0.5)
+    type_print("\n======================================", delay=0.005)
+    type_print("🚀     화성탈출 프로그램에 오신 것을 환영합니다     🚀", delay=0.01)
+    type_print("======================================\n", delay=0.005)
+    time.sleep(0.5)
+
+    type_print("안녕하세요, 사용자님.")
+    time.sleep(0.3)
+    type_print("현재 생존을 위한 6개의 기능이 준비되어 있습니다:\n")
+    time.sleep(0.2)
+
+    features = [
+        "1. 모래폭풍 대응 시뮬레이션",
+        "2. 통신 복구 도우미",
+        "3. 온도 유지 시스템 설정",
+        "4. 감자 재배 관리",
+        "5. 궤도 계산기 (랑데부 시뮬레이터)",
+        "6. 긴급 탈출 전략 모듈"
+    ]
+    for f in features:
+        type_print("  - " + f, delay=0.015)
+        time.sleep(0.1)
+
+    print()
+    type_print("모듈을 선택해주세요. 🚨 생존이 달려있습니다!\n", delay=0.02)
+    main_menu()
+
+def main_menu():
+    choice = input(">> 원하는 기능 번호를 입력하세요 (1~6): ").strip()
+
+    if choice == "1":
+        pass
+    # 각 기능 시작 넣기
+    elif choice == "2":
+        pass
+    # 각 기능 시작 넣기
+    elif choice == "3":
+        pass
+    # 각 기능 시작 넣기
+    elif choice == "4":
+        # if __name__ == "__main__":
+        #     root = tk.Tk()
+        #     app = MarsApp(root)
+        #     root.mainloop()
+        pass
+    # 각 기능 시작 넣기
+    elif choice == "5":
+        pass
+    # 각 기능 시작 넣기
+    elif choice == "6":
+        # rv = Rendezvous()
+        # result = rv.find_closest_approach()
+        # print(f"\n최소 접근 거리: {result['min_distance_km']:.3f} km")
+        # print(f"상대 속도: {result['relative_speed_km_s']:.3f} km/s")
+        # print(f"접근까지 걸린 시간: {result['time_to_min_s']:.1f} s")
+        # rv.visualize(steps=3000)
+        pass
+    # 각 기능 시작 넣기
+    else:
+        print("\n잘못된 입력입니다. 1~6 사이 숫자를 입력해주세요.")
+        main_menu()
 
 class task():
     @classmethod
@@ -799,12 +888,7 @@ class MarsApp:
 #Heater_RTG()
 
 
-rv = Rendezvous()
-result = rv.find_closest_approach()
-print(f"\n최소 접근 거리: {result['min_distance_km']:.3f} km")
-print(f"상대 속도: {result['relative_speed_km_s']:.3f} km/s")
-print(f"접근까지 걸린 시간: {result['time_to_min_s']:.1f} s")
-rv.visualize(steps=3000)
+
 
 
 
@@ -812,7 +896,6 @@ rv.visualize(steps=3000)
 
 
 # # ✅ 실행부
-# if __name__ == "__main__":
-#     root = tk.Tk()
-#     app = MarsApp(root)
-#     root.mainloop()
+
+
+run_intro()
