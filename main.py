@@ -60,7 +60,7 @@ def run_intro():
         time.sleep(0.1)
 
     print()
-    type_print("모듈을 선택해주세요. 🚨 생존이 달려있습니다!\n", delay=0.02)
+    type_print("모듈을 선택해주세요. \n", delay=0.02)
     main_menu()
 
 def main_menu():
