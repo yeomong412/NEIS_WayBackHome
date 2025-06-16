@@ -75,12 +75,12 @@ class Rendezvous(task):
         print("-" * 40)
 
         # compute orbital elements and validate ellipticity
-        self.elems1 = self._compute_elements(self.r1, self.v1)
-        self.elems2 = self._compute_elements(self.r2, self.v2)
+        self.elems1 = self.compute_elements(self.r1, self.v1)
+        self.elems2 = self.compute_elements(self.r2, self.v2)
         if self.elems1['e'] >= 1 or self.elems2['e'] >= 1:
             raise ValueError("One or both orbits are non-elliptical (e >= 1). Please input e < 1.")
 
-    def _compute_elements(self, r, v):
+    def compute_elements(self, r, v):
         tol = 1e-8
         r_norm, v_norm = np.linalg.norm(r), np.linalg.norm(v)
         # semi-major axis
@@ -136,6 +136,7 @@ class Rendezvous(task):
         E0 = 2 * np.arctan(np.sqrt((1 - e) / (1 + e)) * np.tan(true_anom0 / 2))
         M0 = E0 - e * np.sin(E0)
         n = np.sqrt(self.mu / a**3)  # mean motion
+        print({'a': a, 'e': e, 'i': i, 'Ω': RAAN, 'ω': arg_perigee, 'M0': M0, 'n': n})
 
         return {'a': a, 'e': e, 'i': i, 'Ω': RAAN, 'ω': arg_perigee, 'M0': M0, 'n': n}
 
@@ -232,8 +233,12 @@ class Rendezvous(task):
         Y = R_mars * np.sin(U) * np.sin(V)
         Z = R_mars * np.cos(V)
 
-        fig = plt.figure(figsize=(8, 6))
-        ax = fig.add_subplot(111, projection='3d')
+         # use a square figure so the subplot itself is square
+        fig = plt.figure(figsize=(12,12))
+        ax  = fig.add_subplot(111, projection='3d')
+
+        # force equal scaling in x, y, z
+        ax.set_box_aspect([1,1,1])
         ax.plot_wireframe(X, Y, Z, rstride=4, cstride=4,
                           alpha=0.2, color='grey')
 
@@ -274,7 +279,7 @@ class Rendezvous(task):
 rv = Rendezvous()
 result = rv.find_closest_approach()
 print(f"\n최소 접근 거리: {result['min_distance_km']:.3f} km")
-print(f"그때 상대 속도: {result['relative_speed_km_s']:.3f} km/s")
+print(f"상대 속도: {result['relative_speed_km_s']:.3f} km/s")
 print(f"접근까지 걸린 시간: {result['time_to_min_s']:.1f} s")
 rv.visualize(steps=3000)
 
