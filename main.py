@@ -4,8 +4,10 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import tkinter as tk
 from tkinter import messagebox, ttk
-from datetime import datetime
 import random
+from datetime import datetime, timedelta
+import json
+
 
 class task():
     @classmethod
@@ -276,15 +278,6 @@ class Rendezvous(task):
         ax.legend()
         plt.tight_layout()
         plt.show()
-
-
-
-import tkinter as tk
-from tkinter import messagebox, ttk
-from datetime import datetime, timedelta
-import random
-import json
-
 
 class MarsApp:
     def __init__(self, root):
