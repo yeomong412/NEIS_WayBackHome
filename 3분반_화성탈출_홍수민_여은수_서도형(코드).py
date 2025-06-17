@@ -520,8 +520,14 @@ class SandstormGame:
 
 
 
+
+#통신
 class MarsMissionApp:
+    def run(self):
+        print("통신 복구 작업 실행 중...")
+
     def __init__(self):
+        self. run()
         self.password = "You'll never walk alone"
         self.help_signal = "HELP"
         self.special_text = (
@@ -634,10 +640,6 @@ class MarsMissionApp:
                 break
             else:
                 print("올바른 번호를 선택하세요.")
-
-if __name__ == "__main__":
-    app = MarsMissionApp()
-    app.run()
 
 
 class MarsApp:
