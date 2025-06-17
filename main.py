@@ -94,13 +94,35 @@ def main_menu():
         print("\n잘못된 입력입니다. 1~6 사이 숫자를 입력해주세요.")
         main_menu()
 
-class task():
+class task:
+    def __init__(self):
+        func_name = self.__class__.__name__
+        print(f"[{func_name}] 실행중...")
+
+        animation_frames = ["[.      ]", "[..     ]", "[...    ]", "[....   ]", "[.....  ]", "[......]"]
+
+        for _ in range(3):
+            for frame in animation_frames:
+                sys.stdout.write(f"\r{frame}")
+                sys.stdout.flush()
+                time.sleep(0.3)
+
+        print(f"\r[{func_name}] 활성화 완료!\n")
+        self.stop_requested = False
+
+    def stop(self):
+        self.stop_requested = True
+
     @classmethod
-    def CtoK(cls, c): return 273.15 + c
+    def CtoK(cls, c):
+        return 273.15 + c
     
 class Heater_RTG(task):
+    def run(self):
+        print("RTG 온도 시뮬레이션 작업 실행 중...")
+
     def __init__(self):
-        
+        self. run()
         self.heat_emission = 1500  # J/s
         self.init_temp = task.CtoK(float(input("Initial temperture in your Rover? (in °C): ")))  # K
         self.temp_now = self.init_temp
@@ -150,11 +172,13 @@ class Heater_RTG(task):
         plt.show()
 
 class Rendezvous(task):
-
+    def run(self):
+        print("랑데부 궤도 계산 작업 실행 중...")
 
     mu = np.float64(0.042828e6)  # Mars gravitational parameter (km^3/s^2)
 
     def __init__(self):
+        self. run()
         print("Welcome to the Rendezvous Support System!\nPlease enter data for two spacecraft.")
         c1 = input("Spacecraft 1 position (x y z) [km]: ").replace(',', ' ').split()
         v1 = input("Spacecraft 1 velocity (vx vy vz) [km/s]: ").replace(',', ' ').split()
@@ -365,7 +389,11 @@ class Rendezvous(task):
         plt.show()
 
 class SandstormGame:
+    def run(self):
+        print("모래폭풍 시뮬레이션 작업 실행 중...")
+
     def __init__(self, mode="easy"):
+        self. run()
         specs = {
             "easy":        {"turns":10, "storms":(1,1)},
             "intermediate":{"turns":30, "storms":(5,5)},
@@ -495,7 +523,11 @@ class SandstormGame:
 
 #통신
 class MarsMissionApp:
+    def run(self):
+        print("통신 복구 작업 실행 중...")
+
     def __init__(self):
+        self. run()
         self.password = "You'll never walk alone"
         self.help_signal = "HELP"
         self.special_text = (
@@ -611,7 +643,10 @@ class MarsMissionApp:
 
 
 class MarsApp:
+    def run(self):
+        print("화성 생존 시뮬레이터  작업 실행 중...")
     def __init__(self, root):
+        self. run()
         self.root = root
         self.root.title("화성 생존 시뮬레이터")
         self.root.geometry("740x600")
